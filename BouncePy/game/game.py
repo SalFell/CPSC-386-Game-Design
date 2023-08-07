@@ -12,7 +12,7 @@
 
 """Game objects to create PyGame based games."""
 
-from time import sleep
+# from time import sleep
 import os
 import sys
 import pygame
@@ -64,7 +64,7 @@ class VideoGame:
     def build_scene_graph(self):
         """Build the scene graph for the game."""
         self._scene_graph.append(
-            EmptyPressAnyKeyScene(self._screen, rgbcolors.orange)
+            EmptyPressAnyKeyScene(self._screen, rgbcolors.orange1)
         )
 
     def run(self):

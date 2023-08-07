@@ -24,8 +24,7 @@ if __name__ == "__main__":
         NUM_BALLS = int(sys.argv[1])
     if NUM_BALLS >= 50:
         NUM_BALLS = 49
-    if NUM_BALLS < 3:
-        NUM_BALLS = 3
+    NUM_BALLS = max(NUM_BALLS, 3)
     video_game = game.BounceDemo(NUM_BALLS)
     video_game.build_scene_graph()
     video_game.run()
