@@ -9,7 +9,7 @@
 # This BlackJackGame file defines the Player and Dealer classes.
 #
 
-from .cards import score
+from .cards import score, _str_card
 
 
 class Player:
@@ -20,9 +20,10 @@ class Player:
         self._balance = bankroll
         self._bet = 0
         self._side_bet = 0
-        self._hand = [[], []]
+        self._hand = []
+        self._other_hand = []
         self.has_doubled = False
-        self._did_split = False
+        self._has_split = False
         self._score1 = 0
         self._score2 = 0
 
@@ -32,8 +33,9 @@ class Player:
         return self._name
 
     @property
-    def balance(self):
+    def balance(self, bet=0):
         """Returns player balance."""
+        self._balance += bet
         return self._balance
 
     @property
@@ -47,41 +49,50 @@ class Player:
         return self._side_bet
 
     @property
-    def hands(self):
-        """Returns player's hands."""
+    def hand(self):
+        """Returns player's first hand."""
+        for card in self._hand:
+            card = _str_card(card)
+            # [item_to_replace_with if item == item_to_replace else item for item in list_to_replace]
         return self._hand
 
     @property
-    def hand1(self):
-        """Returns player's first hand."""
-        return self._hand[0]
-
-    @property
-    def hand2(self):
+    def other_hand(self):
         """Returns player's second hand."""
-        return self._hand[1]
+        return self._other_hand
 
     @property
     def score1(self):
         """Check the player's score."""
-        self._score1 = score(self._hand[0])
+        self._score1 = score(self._hand)
         return self._score1
 
     @property
     def score2(self):
         """Check the player's score."""
-        self._score2 = score(self._hand[1])
+        self._score2 = score(self._other_hand)
         return self._score2
 
     def __str__(self):
         return self._name
 
     def __repr__(self):
-        return 'Player("{}")'.format(self._name)
+        "Display player information."
+        return (f'\nPlayer: {self._name}\nBalance: ${self._balance}\nBet: ${self._bet}\n'
+                f'Side Bet: ${self.side_bet}\nHand: {self._hand}\nOther Hand: {self._other_hand}\n')
 
     def has_split(self):
         """Checks if player has split."""
-        return len(self._hand[1] == 0)
+        return self._has_split
+
+    def reset_hands(self):
+        """Resets player's hand."""
+        self._hand.clear()
+        self._other_hand.clear()
+        self.has_doubled = False
+        self._has_split = False
+        self._score1 = 0
+        self._score2 = 0
 
     @classmethod
     def hits(cls):
@@ -100,23 +111,28 @@ class Player:
 
         resp = input('Would you like to split? Y/N\n>>> ')
         if resp.lower() == 'y':
-            self._did_split = True
-            # self._hand2 = [self._hand1[:-1]]
-            # self._hand1 = [self._hand[0]]
-            self._hand[1] = [self._hand[0][-1]]
-            self._hand[0] = [self._hand[0][0]]
-            return True
-        return False
+            # double the bet
+            if self._bet <= self._balance:
+                self._balance -= self._bet
+                self._bet += self._bet
+                
+                # split the hand
+                self._other_hand = [self._hand[:-1]]
+                self._hand = [self._hand[0]]
+                self._has_split = True
+                print(f'{self._name}\'s HAND: {self._hand}')
+                print(f'{self._name}\'s OTHER HAND: {self._other_hand}')
+            else:
+                print('Insufficient funds. Can not split.')
+        return self._has_split
 
     def wager(self):
         """Asks player how much they would like to bet."""
 
         resp = int(
             input(
-                '''{}, please place your bet to the
-nearest dollar please.\n>>> $'''.format(self._name)
-            )
-        )
+                f'''{self._name}, please place your bet to the
+nearest dollar.\n>>> $''') )
         if resp <= self._balance:
             self._bet += resp
             self._balance -= resp

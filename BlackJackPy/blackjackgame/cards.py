@@ -45,6 +45,10 @@ class Deck:
             Card(rank, suit) for suit in self.suits for rank in self.ranks
         ]
 
+    def get_cards(self):
+        """Return the cards in the deck."""
+        return self._cards
+    
     def needs_shuffling(self):
         """Checks if the deck needs to be shuffled based on
         the cut card position."""
@@ -96,12 +100,13 @@ def card_value(card):
 def score(hand):
     """Returns the worth of the player's hand."""
     total = 0
-    for i in range(len(hand)):
-        total += sum(map(int, hand[i]))
-        for card in hand[i]:
-            if card.rank == 'Ace':
-                if total + 10 <= 21:
-                    total += 10
+
+    for card in hand:
+        total += card_value(card)
+    if sum(map(lambda card: card.rank == 'Ace', hand)) and total + 10 <= 21:
+        total += 10
+    # lambda creates an anonymous function that declares a behavior
+    # within an existing function
     return total
 
 
